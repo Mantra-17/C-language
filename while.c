@@ -1,11 +1,13 @@
 #include<stdio.h>
-
+int n;
 int main() {
-char i='a';
-    while(i<='z') {
+int i=0;
+printf("enter the value for n:");
+scanf("%d", &n);
+    while(i<=n) {
        
-        printf("%c \n", i);
-       i= i+3;
+        printf("%d \n", i);
+       i++;
 
     }
 
