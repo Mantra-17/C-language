@@ -13,7 +13,9 @@ return 0;
 
 int product(int n) {
     
-    printf("calculate fact of n : %d\n", n); 
+    if(n == 1) {
+        return 1;
+    }
     int productNm1 = product(n-1);
     int productN = productNm1*n;
 
