@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Weather Prediction</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://images.unsplash.com/photo-1544772742-f66c2a2fa6f0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+            z-index: -1;
+        }
+        
+        .container {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+            text-align: left;
+        }
+        
+        h1 {
+            font-size: 2.8em;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-label {
+            font-size: 1.2em;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .input-field {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        
+        .button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        
+        .weather-container {
+            margin-top: 30px;
+        }
+        
+        .weather-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .weather-info {
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+        
+        .charts-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+        }
+        
+        canvas {
+            max-width: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="overlay"></div>
+
+    <div class="container">
+        <h1>Space Weather Prediction</h1>
+
+        <div class="input-group">
+            <label for="destination" class="input-label">Destination:</label>
+            <input type="text" id="destination" class="input-field" placeholder="Enter destination (e.g., Mars)">
+        </div>
+
+        <div class="input-group">
+            <label for="launch-date" class="input-label">Launch Date:</label>
+            <input type="date" id="launch-date" class="input-field">
+        </div>
+
+        <div class="input-group">
+            <label for="travel-time" class="input-label">Travel Time (days):</label>
+            <input type="number" id="travel-time" class="input-field" placeholder="Enter travel time in days">
+        </div>
+
+        <div class="button-group">
+            <button class="button" onclick="fetchCurrentWeather()">Get Current Weather</button>
+            <button class="button" onclick="fetchPredictedWeather()">Get Predicted Weather</button>
+        </div>
+
+        <div id="current-weather" class="weather-container" style="display: none;">
+            <h2 class="weather-title">Current Weather at <span id="current-destination"></span></h2>
+            <div class="charts-container">
+                <canvas id="currentWeatherChart"></canvas>
+                <canvas id="currentWeatherPie"></canvas>
+            </div>
+        </div>
+
+        <div id="predicted-weather" class="weather-container" style="display: none;">
+            <h2 class="weather-title">Predicted Weather at <span id="predicted-destination"></span> on Arrival</h2>
+            <div class="charts-container">
+                <canvas id="predictedWeatherChart"></canvas>
+                <canvas id="predictedWeatherPie"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function fetchCurrentWeather() {
+            const destination = document.getElementById('destination').value;
+            document.getElementById('current-destination').textContent = destination;
+
+            // Sample data for the chart
+            const currentWeatherData = {
+                temperature: -63,
+                radiation: 0.67,
+                solarWindSpeed: 500
+            };
+
+            document.getElementById('current-weather').style.display = 'block';
+            renderCharts('currentWeatherChart', 'currentWeatherPie', currentWeatherData);
+        }
+
+        function fetchPredictedWeather() {
+            const destination = document.getElementById('destination').value;
+            document.getElementById('predicted-destination').textContent = destination;
+
+            // Sample data for the chart
+            const predictedWeatherData = {
+                temperature: -60,
+                radiation: 0.70,
+                solarWindSpeed: 520
+            };
+
+            document.getElementById('predicted-weather').style.display = 'block';
+            renderCharts('predictedWeatherChart', 'predictedWeatherPie', predictedWeatherData);
+        }
+
+        function renderCharts(chartId, pieId, weatherData) {
+            const ctx = document.getElementById(chartId).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Temperature (°C)', 'Radiation (mSv)', 'Solar Wind Speed (km/s)'],
+                    datasets: [{
+                        label: 'Weather Data',
+                        data: [weatherData.temperature, weatherData.radiation, weatherData.solarWindSpeed],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const pieCtx = document.getElementById(pieId).getContext('2d');
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Temperature', 'Radiation', 'Solar Wind Speed'],
+                    datasets: [{
+                        data: [Math.abs(weatherData.temperature), weatherData.radiation, weatherData.solarWindSpeed],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                    }]
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>
